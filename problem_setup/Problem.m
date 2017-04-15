@@ -37,6 +37,10 @@ classdef (Abstract) Problem < handle
             % Find reward
             reward = obj.Rssa(old_state, new_state, action);
         end
+        
+        function is_terminal = isTerminal(obj,state)
+            is_terminal = any(obj.terminal_states == state)
+        end
     end
     
     methods (Abstract)

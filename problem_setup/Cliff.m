@@ -2,10 +2,25 @@ classdef Cliff < Problem
     %RANDOMWALK Summary of this class goes here
     %   Detailed explanation goes here
     
+    properties
+        slopes;
+    end
     methods
         function obj = Cliff(parameters) % Constructor
             % Call superclass constructor with parameters
             obj@Problem(parameters);
+            
+            % Calculate slopes as viewed from every direction
+            rot90 = [0 -1; 1, 0];
+            se = parameters.slope_east;
+            sn = parameters.slope_north;
+            
+            slopes = zeros(2,4);
+            slopes(:,1) = [se,sn];
+            
+            for i = 2:4
+                slopes(:,i) = rot90*slopes(:,i-1);
+            end
         end
         
         function setNStates(obj,~)
@@ -20,14 +35,16 @@ classdef Cliff < Problem
             obj.gamma = parameters.gamma;
         end
         
-        function setPssa(obj, parameters)
-            e = parameters.slope_east;
-            n = parameters.slope_north;
+        function setPssa(obj,~)
             ns = obj.n_states;
             na = obj.n_actions;
             Pssa = zeros(ns, ns, na);
-            %TODO
-            % Calculate transition probabilities
+            
+            for si = 1:ns
+                for a = 1:na
+                    Pssa(si,:,a) = obj.getPssa(si,a);
+                end
+            end
             
             obj.Pssa = Pssa;
         end
@@ -37,7 +54,7 @@ classdef Cliff < Problem
             na = obj.n_actions;
             Rssa = -1*ones(ns,ns,na); % Reward is -1 for most transitions
             Rssa(:,2:11,:) = -100; % Reward is -100 when falling
-            Rssa(:,ns,:) = 0; % Reward is 0 when reaching the terminal state
+            Rssa(:,ns,:) = 0; % Reward is 0 when reaching terminal state
             obj.Rssa = Rssa;
         end
         
@@ -55,5 +72,59 @@ classdef Cliff < Problem
         end
     end
     
+    methods (Access = 'protected')
+        function Pssa_simple = getSimplePssa(obj,a)
+            obj.slopes
+            slopeT = obj.slopes(:,a);
+            if slopeT(2) >= 0
+                perp1 = 1/2*(1-slopeT(2));
+                perp2 = perp1*slopeT(1);
+                PTemp = [1-abs(perp2), max(0, perp2), 0, max(0,-perp2)];
+            else
+                perp = 1/2*slopeT(1);
+                paral = 1-abs(perp);
+                forward = paral*(1+1/2*slopeT(2));
+                PTemp = [forward, max(0, perp), 1-forward-abs(perp), max(0,-perp)];
+            end
+            Pssa_simple = [PTemp(6-a:4), PTemp(1:5-a)];
+        end
+        function Pssa_sia = getPssa(obj,si,a)
+            ns = obj.n_states;
+            if si == 2:11
+                Pssa_sia = (1:ns == 1) % Return to initial state from cliff
+            elseif si == 12
+                Pssa_sia = (1:ns == 12) % Stay in end state
+            else
+                Pssa_simple = getSimplePssa(obj,a);
+                sn = si + 12;
+                se = si + 1;
+                ss = si - 12;
+                sw = si - 1;
+                P_stay = 0;
+                Pssa_sia = zeros(ns, 1);
+                if sn > ns % If there is no north state
+                    P_stay = P_stay + Pssa_simple(1);
+                else
+                   Pssa_sia(sn) = Pssa_simple(1);
+                end
+                if se > 12*ceil(si/12) % If there is no east state
+                    P_stay = P_stay + Pssa_simple(2);
+                else
+                    Pssa_sia(se) = Pssa_simple(2);
+                end
+                if ss < 1 % If there is no south state
+                    P_stay = P_stay + Pssa_simple(3);
+                else
+                    Pssa_sia(ss) = Pssa_simple(3);
+                end
+                if sw <= 12*floor(si/12) % If there is no west state
+                    P_stay = P_stay + Pssa_simple(4);
+                else
+                    Pssa_sia(sw) = Pssa_simple(4);
+                end
+                Pssa_sia(si) = P_stay;
+            end
+        end
+    end
 end
 
