@@ -10,17 +10,7 @@ classdef Cliff < Problem
             % Call superclass constructor with parameters
             obj@Problem(parameters);
             
-            % Calculate slopes as viewed from every direction
-            rot90 = [0 -1; 1, 0];
-            se = parameters.slope_east;
-            sn = parameters.slope_north;
             
-            slopes = zeros(2,4);
-            slopes(:,1) = [se,sn];
-            
-            for i = 2:4
-                slopes(:,i) = rot90*slopes(:,i-1);
-            end
         end
         
         function setNStates(obj,~)
@@ -35,7 +25,20 @@ classdef Cliff < Problem
             obj.gamma = parameters.gamma;
         end
         
-        function setPssa(obj,~)
+        function setPssa(obj, parameters)
+            
+            % Calculate slopes as viewed from every direction
+            rot90 = [0 -1; 1, 0];
+            se = parameters.slope_east;
+            sn = parameters.slope_north;
+            
+            obj.slopes = zeros(2,4);
+            obj.slopes(:,1) = [se,sn];
+            
+            for i = 2:4
+                obj.slopes(:,i) = rot90*obj.slopes(:,i-1);
+            end
+            
             ns = obj.n_states;
             na = obj.n_actions;
             Pssa = zeros(ns, ns, na);
@@ -66,8 +69,7 @@ classdef Cliff < Problem
         end
         
         function setTerminalStates(obj,~)
-            ns = obj.n_states;
-            te = [12]; % Terminal state is state 12 (southeastern corner)
+            te = 12; % Terminal state is state 12 (southeastern corner)
             obj.terminal_states = te;
         end
     end
@@ -90,10 +92,10 @@ classdef Cliff < Problem
         end
         function Pssa_sia = getPssa(obj,si,a)
             ns = obj.n_states;
-            if si == 2:11
-                Pssa_sia = (1:ns == 1) % Return to initial state from cliff
+            if any(si == 2:11)
+                Pssa_sia = (1:ns == 1); % Return to initial state from cliff
             elseif si == 12
-                Pssa_sia = (1:ns == 12) % Stay in end state
+                Pssa_sia = (1:ns == 12); % Stay in end state
             else
                 Pssa_simple = getSimplePssa(obj,a);
                 sn = si + 12;
@@ -105,7 +107,7 @@ classdef Cliff < Problem
                 if sn > ns % If there is no north state
                     P_stay = P_stay + Pssa_simple(1);
                 else
-                   Pssa_sia(sn) = Pssa_simple(1);
+                    Pssa_sia(sn) = Pssa_simple(1);
                 end
                 if se > 12*ceil(si/12) % If there is no east state
                     P_stay = P_stay + Pssa_simple(2);

@@ -39,7 +39,7 @@ classdef (Abstract) Problem < handle
         end
         
         function is_terminal = isTerminal(obj,state)
-            is_terminal = any(obj.terminal_states == state)
+            is_terminal = any(obj.terminal_states == state);
         end
     end
     
