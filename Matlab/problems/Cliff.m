@@ -9,8 +9,6 @@ classdef Cliff < Problem
         function obj = Cliff(parameters) % Constructor
             % Call superclass constructor with parameters
             obj@Problem(parameters);
-            
-            
         end
         
         function setNStates(obj,~)
@@ -72,11 +70,42 @@ classdef Cliff < Problem
             te = 12; % Terminal state is state 12 (southeastern corner)
             obj.terminal_states = te;
         end
+        
+        function [x, y] = getCoordinates(obj, state)
+            x = mod(state-1, 12);
+            y = ceil(state/12)-1;
+        end
+        
+        function plotPssa(obj)
+            figure
+            for a = 1:obj.n_actions
+                subplot(2,2,a)
+                action_name = {'North','East','South','West'};
+                title(action_name{a});
+                hold
+                for si = 1:obj.n_states
+                    [xi, yi] = getCoordinates(obj, si);
+                    for sf =  1:obj.n_states
+                        if obj.Pssa(si,sf,a) > 0
+                            [xf, yf] = getCoordinates(obj, sf);
+                            q = quiver(xi,yi,(xf-xi)*obj.Pssa(si,sf,a),(yf-yi)*obj.Pssa(si,sf,a));
+                            q.Color = 'red';
+                            q.LineWidth = 2;
+                            % q.ShowArrowHead = 'off';
+                            % q.MaxHeadSize = 1;
+                            
+                            q.Marker = 'o';
+                            q.MarkerFaceColor = 'blue';
+                            q.MarkerEdgeColor = 'blue';
+                        end
+                    end
+                end
+            end
+        end
     end
     
     methods (Access = 'protected')
-        function Pssa_simple = getSimplePssa(obj,a)
-            obj.slopes
+        function Pssa_simple = getSimplePssa(obj, a)
             slopeT = obj.slopes(:,a);
             if slopeT(2) >= 0
                 perp1 = 1/2*(1-slopeT(2));
@@ -90,7 +119,7 @@ classdef Cliff < Problem
             end
             Pssa_simple = [PTemp(6-a:4), PTemp(1:5-a)];
         end
-        function Pssa_sia = getPssa(obj,si,a)
+        function Pssa_sia = getPssa(obj, si, a)
             ns = obj.n_states;
             if any(si == 2:11)
                 Pssa_sia = (1:ns == 1); % Return to initial state from cliff
@@ -129,4 +158,3 @@ classdef Cliff < Problem
         end
     end
 end
-

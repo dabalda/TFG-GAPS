@@ -3,7 +3,9 @@ classdef RandomWalk < Problem
     %   Detailed explanation goes here
     
     methods
-        function obj = RandomWalk(parameters) % Constructor
+        function obj = RandomWalk(parameters)
+            % Constructor
+            
             % Call superclass constructor with parameters
             obj@Problem(parameters);
         end
@@ -71,10 +73,9 @@ classdef RandomWalk < Problem
         
         function setTerminalStates(obj,~)
             ns = obj.n_states;
-            te = [1,ns];
-            obj.terminal_states = te;
+            ts = [1,ns];
+            obj.terminal_states = ts;
         end
     end
     
 end
-
