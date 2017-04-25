@@ -10,10 +10,10 @@ function [ PI, Q ] = SARSA( problem, n_episodes, epsilon, alpha, discount_thresh
 %   value is not worse than the best minus tolerance.
 
 % Get parameters
-n_states = problem.n_states;
-n_actions = problem.n_actions;
-gamma = problem.gamma;
-terminal_states = problem.terminal_states;
+n_states =          problem.n_states;
+n_actions =         problem.n_actions;
+gamma =             problem.gamma;
+terminal_states =   problem.terminal_states;
 
 % Initialize Q arbitrarily for all state-action pairs
 Q = 20*rand(n_states,n_actions)-10;

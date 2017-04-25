@@ -55,6 +55,14 @@ classdef (Abstract) Problem < handle
         end
         
         % Policies
+        function PI = getRandomPolicy(obj)
+            % getRandomPolicy Returns the stochastic random policy for this
+            % problem, which gives equal probability to all possible
+            % actions.
+            ns = obj.n_states;
+            na = obj.n_actions;
+            PI = (1/na)*ones(ns,na);
+        end
         
         function PIsa = getGreedyPolicy(obj, Q, tolerance)
             % getGreedyPolicy Returns greedy policy matrix given a
@@ -63,9 +71,13 @@ classdef (Abstract) Problem < handle
             ns = obj.n_states;
             na = obj.n_actions;
             % Initialize policy probability matrix
-            PIsa = zeros(ns,ns*na);
+            %             PIsa = zeros(ns,ns*na);
+            %             for s = 1:obj.n_states
+            %                 PIsa(s,(s-1)*na+1:s*na) = getStateGreedyPolicy(obj,Q,tolerance,s);
+            %             end
+            PIsa = zeros(ns,na);
             for s = 1:obj.n_states
-                PIsa(s,(s-1)*na+1:s*na) = getStateGreedyPolicy(obj,Q,tolerance,s);
+                PIsa(s,:) = getStateGreedyPolicy(obj,Q,tolerance,s);
             end
         end
         
