@@ -39,7 +39,7 @@ for i = 1:n_episodes
         % Take action a and observe r and s_next
         [s_next, r, is_terminal] = problem.sampleTransition(s,a);
         % Find greedy action for next state
-        greedy_a_next = problem.sampleStateEpsilonGreedyPolicy(Q,tolerance,s_next,epsilon);
+        greedy_a_next = problem.sampleStateGreedyPolicy(Q,tolerance,s_next);
         % Update Q(s,a)
         Q(s,a) = Q(s,a) + alpha*(r+gamma*Q(s_next, greedy_a_next)-Q(s,a));
         % Update s

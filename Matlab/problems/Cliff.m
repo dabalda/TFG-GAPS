@@ -1,6 +1,9 @@
 classdef Cliff < Problem
-    %RANDOMWALK Summary of this class goes here
-    %   Detailed explanation goes here
+    %RANDOMWALK Cliff Walking problem definition
+    %   Parameters:
+    %   gamma
+    %   slope_east
+    %   slope_north
     
     properties
         slopes;

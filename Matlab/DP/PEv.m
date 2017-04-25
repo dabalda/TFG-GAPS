@@ -1,6 +1,6 @@
-function [ v ] = PEv( problem, PI, epsilon )
+function [ v, Q, n_it ] = PEv( problem, PI, epsilon )
 %PEV Policy Evaluation for state-value functions.
-%   [ v ] = PEv( problem, PI, epsilon )
+%   [ v, Q, n_it ] = PEv( problem, PI, epsilon )
 %   Evaluates state value function for policy PI. Loop ends when delta <
 %   epsilon.
 
@@ -17,19 +17,21 @@ v = 20*rand(n_states,1)-10;
 % Initialize loop
 delta = inf;
 
+n_it = 0;
 while delta >= epsilon
-    v_old = v;
-    for si = 1:n_states % For each initial state
-        v(si) = 0;
-        for sf = 1:n_states % For each next state
-            for a = 1:n_actions % For each action
-                v(si) = v(si) + PI(si,a)*(R(si,sf,a)+gamma*P(si,sf,a)*v_old(sf));
-            end
-        end
-    end
+    n_it = n_it+1;
+    v_old = v; % Save old v
+    
+    % Repeat v for each initial state and action
+    v_ssa = repmat(v_old(:)',[n_states,1,n_actions]);   
+    % Partial result
+    v_2 = R+gamma.*v_ssa;
+    % Get Q
+    Q = squeeze(sum(P.*v_2, 2));
+    % Update v
+    v = sum(PI.*Q,2);      
+    
+    % Check stability
     delta = norm(v_old-v,inf);
 end
-
-
 end
-

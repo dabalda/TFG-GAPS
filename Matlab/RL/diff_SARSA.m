@@ -3,15 +3,30 @@ function [ PI, q_opt ] = diff_SARSA( problems, n_episodes, epsilon, alpha, disco
 
 n_states = problems(1).n_states;
 n_actions = problems(1).n_actions;
+terminal_states = problems(1).terminal_states;
+n_problems = length(problems);
 
-q_local = 20*rand(n_states*n_actions, length(problems))-10;
-q = q_local;
+% Initialize diffusion Q arbitrarily for all state-action pairs
+Q = 20*rand(n_states,n_actions,n_problems)-10;
 
-for i = 1:n_episodes   
-    disp(['Diff. SARSA ',num2str(i)]) 
-    for j = 1:length(problems)
+% Initialize diffusion Q to 0 for all terminal states
+for s = terminal_states
+    Q(s,:) = 0;
+end
+
+% Initialize local Q 
+Q_local = Q;
+
+for i = 1:n_episodes
+    
+    
+    
+    for j = 1:n_problems
+        disp(['Diff. SARSA episode ',num2str(i),' / ',num2str(n_episodes),...
+            ', problem ',num2str(j),' / ',num2str(n_problems)])
+       
+        problem = problems(j);
         
-        problem = problems(j);       
         gamma = problem.gamma;
         terminal_states = problem.terminal_states;
         
@@ -33,7 +48,7 @@ for i = 1:n_episodes
             nextSA = (s_next-1)*n_actions+a_next;
             
             % Update q(s,a)
-            q_local(currentSA,j) = q_local(currentSA,j) + alpha*(r+gamma*q(nextSA,j)-q_local(currentSA,j));
+            q_local(currentSA,j) = q_local(currentSA,j) + alpha*(r+gamma*Q(nextSA,j)-q_local(currentSA,j));
             
             % Update s & a
             s = s_next;
@@ -43,7 +58,7 @@ for i = 1:n_episodes
                 break
             end
         end
-              
+        
     end
     
     q = q_local*taus';

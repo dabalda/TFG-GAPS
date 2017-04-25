@@ -1,6 +1,10 @@
 classdef RandomWalk < Problem
-    %RANDOMWALK Summary of this class goes here
-    %   Detailed explanation goes here
+    %RANDOMWALK Random Walk problem definition
+    %   Parameters:
+    %   gamma
+    %   prob_desired_right
+    %   prob_desired_left
+    %   all_states_initial
     
     methods
         function obj = RandomWalk(parameters)
@@ -15,7 +19,7 @@ classdef RandomWalk < Problem
         end
         
         function setNActions(obj,~)
-            obj.n_actions = 2; % Right, Left
+            obj.n_actions = 2; % Left, Right
         end
         
         function setGamma(obj, parameters)
@@ -64,10 +68,15 @@ classdef RandomWalk < Problem
             obj.Rssa = Rssa;
         end
         
-        function setInitialStates(obj,~)
+        function setInitialStates(obj, parameters)
             ns = obj.n_states;
             is = zeros(ns,1);
-            is(ceil(ns/2)) = 1;
+            if parameters.all_states_initial
+                is(2:ns-1) = 1/(ns-2);
+            else              
+                is(ceil(ns/2)) = 1;
+            end
+            %
             obj.initial_states = is;
         end
         
@@ -75,6 +84,31 @@ classdef RandomWalk < Problem
             ns = obj.n_states;
             ts = [1,ns];
             obj.terminal_states = ts;
+        end
+        
+        function plotPssa(obj)
+            figure
+            for a = 1:obj.n_actions
+                subplot(2,1,a)
+                action_name = {'Left','Right'};
+                title(action_name{a});
+                hold
+                for si = 1:obj.n_states
+                    for sf =  1:obj.n_states
+                        if obj.Pssa(si,sf,a) > 0
+                            q = quiver(si,0,(sf-si)*obj.Pssa(si,sf,a),0);
+                            q.Color = 'red';
+                            q.LineWidth = 2;
+                            % q.ShowArrowHead = 'off';
+                            % q.MaxHeadSize = 1;
+                            
+                            q.Marker = 'o';
+                            q.MarkerFaceColor = 'blue';
+                            q.MarkerEdgeColor = 'blue';
+                        end
+                    end
+                end
+            end
         end
     end
     

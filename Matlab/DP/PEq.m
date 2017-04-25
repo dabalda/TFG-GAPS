@@ -1,6 +1,6 @@
-function [ Q ] = PEq( problem, PI, epsilon )
+function [ Q, v, n_it ] = PEq( problem, PI, epsilon )
 %PEV Policy Evaluation for state-value functions.
-%   [ Q ] = PEv( problem, PI, epsilon )
+%   [ Q, v, n_it ] = PEv( problem, PI, epsilon )
 %   Evaluates state-action value function for policy PI. Loop ends when
 %   delta < epsilon.
 
@@ -11,28 +11,27 @@ gamma =     problem.gamma;
 P =         problem.Pssa;
 R =         problem.Rssa;
 
-% Initialize v(s) arbitrarily
+% Initialize Q(s,a) arbitrarily
 Q = 20*rand(n_states,n_actions)-10;
 
 % Initialize loop
 delta = inf;
 
+n_it = 0;
 while delta >= epsilon
-    Q_old = Q;
-    for si = 1:n_states % For each initial state
-        for ai = 1:n_actions % For each initial action
-            Q(si,ai) = 0;
-            for sf = 1:n_states % For each next state
-                for af = 1:n_actions % For each next action
-                    Q(si,ai) = Q(si,ai) + R(si,sf,ai)+gamma*P(si,sf,ai)*PI(sf,af)*Q_old(sf,af);
-                end
-            end
-        end
-       
-    end
+    n_it = n_it+1;
+    Q_old = Q; % Save old Q
+    
+    % State value function 
+    v = sum(PI.*Q_old,2);    
+    % Repeat v for each initial state and action
+    v_ssa = repmat(v(:)',[n_states,1,n_actions]);    
+    % Partial result
+    v_2 = R+gamma.*v_ssa;    
+    % Update Q
+    Q = squeeze(sum(P.*v_2, 2)); 
+    
+    % Check stability
     delta = max(max(abs(Q_old-Q)));
 end
-
-
 end
-
