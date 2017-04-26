@@ -1,5 +1,5 @@
 function [ Q, v, n_it ] = PEq( problem, PI, epsilon )
-%PEV Policy Evaluation for state-value functions.
+%PEQ Policy Evaluation for state-value functions.
 %   [ Q, v, n_it ] = PEv( problem, PI, epsilon )
 %   Evaluates state-action value function for policy PI. Loop ends when
 %   delta < epsilon.
@@ -11,9 +11,8 @@ n_actions = problem.n_actions;
 % Initialize Q(s,a) arbitrarily
 Q = 20*rand(n_states,n_actions)-10;
 
-% Initialize loop
+% Initialize loop variables
 delta = inf;
-
 n_it = 0;
 while delta >= epsilon
     n_it = n_it+1;

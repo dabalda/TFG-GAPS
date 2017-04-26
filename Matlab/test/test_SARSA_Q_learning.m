@@ -84,3 +84,25 @@ tolerance = 1e-3;
 epsilonPE = 1e-6;
 [~, Q_PEv, ~] = PEv(problemCl, PIs, epsilonPE);
 norm(Q_PEv-Qs, inf)
+
+%%
+epsilonPE = 1e-6;
+[PI_PIv, v_PIv, Q_PIv, n] = PIv(problemRW, epsilonPE, [])
+[PI_VIv, v_VIv, Q_VIv, n] = VIv(problemRW, epsilonPE)
+
+[PI_PIq, Q_PIq, v_PIq, n] = PIq(problemRW, epsilonPE, [])
+[PI_VIq, Q_VIq, v_VIq, n] = VIq(problemRW, epsilonPE)
+
+norm(v_PIv-v_VIv, inf)
+norm(Q_PIq-Q_VIq, inf)
+
+%%
+epsilonPE = 1e-6;
+[PI_PIv, v_PIv, Q_PIv, n] = PIv(problemCl, epsilonPE, [])
+[PI_VIv, v_VIv, Q_VIv, n] = VIv(problemCl, epsilonPE)
+
+[PI_PIq, Q_PIq, v_PIq, n] = PIq(problemCl, epsilonPE, [])
+[PI_VIq, Q_VIq, v_VIq, n] = VIq(problemCl, epsilonPE)
+
+norm(v_PIv-v_VIv, inf)
+norm(Q_PIq-Q_VIq, inf)

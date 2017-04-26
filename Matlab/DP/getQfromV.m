@@ -1,5 +1,5 @@
 function [ Q ] = getQfromV( problem, v )
-%GETQFROMV Summary of this function goes here
+%GETQFROMV Get Q(s,a) from v(s).
 %   [ Q ] = getQfromV( problem, v )
 
 % Get parameters

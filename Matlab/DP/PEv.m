@@ -6,17 +6,12 @@ function [ v, Q, n_it ] = PEv( problem, PI, epsilon )
 
 % Get parameters
 n_states =  problem.n_states;
-n_actions = problem.n_actions;
-gamma =     problem.gamma;
-P =         problem.Pssa;
-R =         problem.Rssa;
 
 % Initialize v(s) arbitrarily
 v = 20*rand(n_states,1)-10;
 
-% Initialize loop
+% Initialize loop variables
 delta = inf;
-
 n_it = 0;
 while delta >= epsilon
     n_it = n_it+1;
