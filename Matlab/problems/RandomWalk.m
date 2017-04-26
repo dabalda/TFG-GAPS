@@ -11,6 +11,9 @@ classdef RandomWalk < Problem
             % Constructor
             
             % Call superclass constructor with parameters
+            if nargin == 0
+                parameters = struct([]);
+            end
             obj@Problem(parameters);
         end
         

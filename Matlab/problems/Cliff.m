@@ -9,8 +9,13 @@ classdef Cliff < Problem
         slopes;
     end
     methods
-        function obj = Cliff(parameters) % Constructor
+        function obj = Cliff(parameters) 
+            % Constructor
+            
             % Call superclass constructor with parameters
+            if nargin == 0
+                parameters = struct([]);
+            end
             obj@Problem(parameters);
         end
         
@@ -74,9 +79,13 @@ classdef Cliff < Problem
             obj.terminal_states = te;
         end
         
-        function [x, y] = getCoordinates(obj, state)
+        function [x, y] = getCoordinates(~, state)
             x = mod(state-1, 12);
             y = ceil(state/12)-1;
+        end
+        
+        function s = getStateIndex(~, x, y)
+            s = 12*y + x;
         end
         
         function plotPssa(obj)
@@ -105,6 +114,7 @@ classdef Cliff < Problem
                 end
             end
         end
+        
         function plotPolicy(obj, PI)
             figure
             hold
@@ -126,8 +136,14 @@ classdef Cliff < Problem
                         q.MarkerEdgeColor = 'blue';
                     end
                 end
-            end
-            
+            end           
+        end
+        
+        function plotV(~, v)
+            v_grid = reshape(v, [12,4]);
+            [x,y] = meshgrid(1:12,1:4);
+            figure
+            mesh(x,y,v_grid')
         end
     end
     

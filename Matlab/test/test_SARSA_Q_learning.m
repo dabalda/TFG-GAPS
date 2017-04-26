@@ -21,6 +21,10 @@ discount_threshold = 0;
 tolerance = 1e-3;
 
 [ PIq, Qq ] = Q_learning( problemRW, n_episodes, epsilonRL, alpha, discount_threshold, tolerance, verbose );
+
+epsilonPE = 1e-6;
+Q_PEq = PEq(problemRW, PIq, epsilonPE);
+norm(Q_PEq-Qq, inf)
 %%
 n_episodes = 100000;
 epsilonRL = .05;
@@ -29,6 +33,10 @@ discount_threshold = 0;
 tolerance = 1e-3;
 
 [ PIs, Qs ] =      SARSA( problemRW, n_episodes, epsilonRL, alpha, discount_threshold, tolerance, verbose );
+
+epsilonPE = 1e-6;
+Q_PEq = PEq(problemRW, PIs, epsilonPE);
+norm(Q_PEq-Qs, inf)
 %%
 epsilonPE = 1e-6;
 [ Q_PEq, n ] = PEq(problemRW, PIs, epsilonPE)
@@ -45,14 +53,14 @@ norm(Q_PEq - Qs, 1)
 
 %%
 epsilonPE = 1e-6;
-[PI_VIv, v_PIv, Q_PIv, n] = PIv(problemRW, epsilonPE, [])
+[PI_VIv, v_PIv, Q_PIv, n] = PIv(problemRW, epsilonPE)
 [v_PEv, Q_PEv, n] = PEv(problemRW, PI_VIv, epsilonPE)
 v_PIv - v_PEv
 Q_PIv - Q_PEv
 
 %%
 epsilonPE = 1e-6;
-[PI_VIv, v_PIv, Q_PIv, n] = PIv(problemCl, epsilonPE, [])
+[PI_VIv, v_PIv, Q_PIv, n] = PIv(problemCl, epsilonPE)
 [v_PEv, Q_PEv, n] = PEv(problemCl, PI_VIv, epsilonPE)
 v_PIv - v_PEv
 Q_PIv - Q_PEv
@@ -61,7 +69,7 @@ Q_test = getQfromV(problemCl, v_PIv);
 norm(Q_test - Q_PIv)
 
 %%
-n_episodes = 100000;
+n_episodes = 10000;
 epsilonRL = .05;
 alpha = .01;
 discount_threshold = 0;
@@ -70,10 +78,10 @@ tolerance = 1e-3;
 [ PIq, Qq ] = Q_learning( problemCl, n_episodes, epsilonRL, alpha, discount_threshold, tolerance, verbose );
 
 epsilonPE = 1e-6;
-[~, Q_PEv, ~] = PEv(problemCl, PIq, epsilonPE);
-norm(Q_PEv-Qq, inf)
+Q_PEq = PEq(problemCl, PIq, epsilonPE);
+norm(Q_PEq-Qq, inf)
 %%
-n_episodes = 100000;
+n_episodes = 10000;
 epsilonRL = .05;
 alpha = .01;
 discount_threshold = 0;
@@ -82,15 +90,15 @@ tolerance = 1e-3;
 [ PIs, Qs ] =      SARSA( problemCl, n_episodes, epsilonRL, alpha, discount_threshold, tolerance, verbose );
 
 epsilonPE = 1e-6;
-[~, Q_PEv, ~] = PEv(problemCl, PIs, epsilonPE);
-norm(Q_PEv-Qs, inf)
+Q_PEq = PEq(problemCl, PIs, epsilonPE);
+norm(Q_PEq-Qs, inf)
 
 %%
 epsilonPE = 1e-6;
-[PI_PIv, v_PIv, Q_PIv, n] = PIv(problemRW, epsilonPE, [])
+[PI_PIv, v_PIv, Q_PIv, n] = PIv(problemRW, epsilonPE)
 [PI_VIv, v_VIv, Q_VIv, n] = VIv(problemRW, epsilonPE)
 
-[PI_PIq, Q_PIq, v_PIq, n] = PIq(problemRW, epsilonPE, [])
+[PI_PIq, Q_PIq, v_PIq, n] = PIq(problemRW, epsilonPE)
 [PI_VIq, Q_VIq, v_VIq, n] = VIq(problemRW, epsilonPE)
 
 norm(v_PIv-v_VIv, inf)
@@ -98,10 +106,10 @@ norm(Q_PIq-Q_VIq, inf)
 
 %%
 epsilonPE = 1e-6;
-[PI_PIv, v_PIv, Q_PIv, n] = PIv(problemCl, epsilonPE, [])
+[PI_PIv, v_PIv, Q_PIv, n] = PIv(problemCl, epsilonPE)
 [PI_VIv, v_VIv, Q_VIv, n] = VIv(problemCl, epsilonPE)
 
-[PI_PIq, Q_PIq, v_PIq, n] = PIq(problemCl, epsilonPE, [])
+[PI_PIq, Q_PIq, v_PIq, n] = PIq(problemCl, epsilonPE)
 [PI_VIq, Q_VIq, v_VIq, n] = VIq(problemCl, epsilonPE)
 
 norm(v_PIv-v_VIv, inf)

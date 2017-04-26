@@ -21,14 +21,15 @@ classdef (Abstract) Problem < handle
             % Accepts as input a struct which has to contain these fields:
             %   'gamma': discount factor.
             %   Other fields required by the extended class.
-            
-            obj.setNStates(parameters);
-            obj.setNActions(parameters);
-            obj.setGamma(parameters);
-            obj.setPssa(parameters);
-            obj.setRssa(parameters);
-            obj.setInitialStates(parameters);
-            obj.setTerminalStates(parameters);
+            if ~isempty(parameters)
+                obj.setNStates(parameters);
+                obj.setNActions(parameters);
+                obj.setGamma(parameters);
+                obj.setPssa(parameters);
+                obj.setRssa(parameters);
+                obj.setInitialStates(parameters);
+                obj.setTerminalStates(parameters);
+            end
         end
         
         % States and rewards

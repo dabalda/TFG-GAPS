@@ -17,11 +17,11 @@ while delta >= epsilon
     Q_old = Q; % Save old Q
     
     % Update Q with Optimal Bellman Operator
-    [Q, v] = bellmanOperatorQ(problem, Q_old, []);
+    [Q, v] = bellmanOperatorQ(problem, Q_old);
     
     % Check stability
     delta = max(max(abs(Q_old-Q)));
 end
 PI = problem.getGreedyPolicy(Q, epsilon);
+v = getVfromQ(PI,Q);
 end
-

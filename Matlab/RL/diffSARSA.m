@@ -1,6 +1,7 @@
-function [ PI, q_opt ] = diff_SARSA( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, taus )
-%DIFF_SARSA
+function [ PI, q_opt ] = diffSARSA( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, neighbours )
+%DIFFSARSA
 
+% Get parameters
 n_states = problems(1).n_states;
 n_actions = problems(1).n_actions;
 terminal_states = problems(1).terminal_states;
@@ -11,7 +12,7 @@ Q = 20*rand(n_states,n_actions,n_problems)-10;
 
 % Initialize diffusion Q to 0 for all terminal states
 for s = terminal_states
-    Q(s,:) = 0;
+    Q(s,:,:) = 0;
 end
 
 % Initialize local Q 
@@ -22,8 +23,10 @@ for i = 1:n_episodes
     
     
     for j = 1:n_problems
+        if verbose
         disp(['Diff. SARSA episode ',num2str(i),' / ',num2str(n_episodes),...
             ', problem ',num2str(j),' / ',num2str(n_problems)])
+        end
        
         problem = problems(j);
         
@@ -61,7 +64,7 @@ for i = 1:n_episodes
         
     end
     
-    q = q_local*taus';
+    q = q_local*neighbours';
     
 end
 % Calculate greedy policy
