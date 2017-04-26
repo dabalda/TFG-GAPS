@@ -22,14 +22,8 @@ while delta >= epsilon
     n_it = n_it+1;
     v_old = v; % Save old v
     
-    % Repeat v for each initial state and action
-    v_ssa = repmat(v_old(:)',[n_states,1,n_actions]);   
-    % Partial result
-    v_2 = R+gamma.*v_ssa;
-    % Get Q
-    Q = squeeze(sum(P.*v_2, 2));
     % Update v
-    v = sum(PI.*Q,2);      
+    [v, Q] = bellmanOperatorV(problem, v_old, PI);  
     
     % Check stability
     delta = norm(v_old-v,inf);

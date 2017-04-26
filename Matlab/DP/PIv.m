@@ -6,13 +6,6 @@ function [ PI, v, Q, n_it ] = PIv( problem, epsilon, PI_ini )
 %   or the random policy if PI_ini = []. Greedy policies select all actions
 %   whose value is not worse than the best minus epsilon.
 
-% Get parameters
-n_states =  problem.n_states;
-n_actions = problem.n_actions;
-gamma =     problem.gamma;
-P =         problem.Pssa;
-R =         problem.Rssa;
-
 % Initialize PI to random policy if none is supplied
 PI = PI_ini;
 if isequal(PI, [])
@@ -33,12 +26,8 @@ while ~policy_stable % Policy iteration main loop
     % Policy improvement
     PI_temp = PI;
     
-    % Repeat v for each initial state and action
-    v_ssa = repmat(v(:)',[n_states,1,n_actions]);
-    % Partial result
-    v_2 = R+gamma.*v_ssa;
     % Get Q
-    Q = squeeze(sum(P.*v_2, 2));
+    Q = getQfromV(problem, v);
     
     % Find best policy and update the existing one
     PI = problem.getGreedyPolicy(Q, epsilon); % Using epsilon as tolerance

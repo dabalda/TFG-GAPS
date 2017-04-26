@@ -1,6 +1,6 @@
-function [ PI, Q ] = SARSA( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance )
+function [ PI, Q ] = SARSA( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose )
 %SARSA with epsilon-greedy target policy for episodic or non-episodic MDPs.
-%   [ PI, Q ] = SARSA(problem,n_episodes,epsilon,alpha,discount_threshold,tolerance)
+%   [ PI, Q ] = SARSA(problem,n_episodes,epsilon,alpha,discount_threshold,tolerance, verbose)
 %   Finds optimal policy and optimal state-action value function for the
 %   problem iterating over n_episodes episodes with epsilon-greedy policy
 %   using a constant alpha as step-size sequence. An episode is terminated
@@ -23,7 +23,12 @@ for s = terminal_states
     Q(s,:) = 0;
 end
 
+step = floor(n_episodes/100);
 for i = 1:n_episodes
+    if ~mod(i,step) && verbose
+        disp(['SARSA episode ',num2str(i),' of ',num2str(n_episodes)])
+    end    
+    
     % Initialize s
     s = problem.sampleInitialState();
     % Choose action using e-greedy policy from current Q

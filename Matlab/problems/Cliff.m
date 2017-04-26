@@ -58,7 +58,7 @@ classdef Cliff < Problem
             na = obj.n_actions;
             Rssa = -1*ones(ns,ns,na); % Reward is -1 for most transitions
             Rssa(:,2:11,:) = -100; % Reward is -100 when falling
-            Rssa(:,ns,:) = 0; % Reward is 0 when reaching terminal state
+            Rssa(:,12,:) = 0; % Reward is 0 when reaching terminal state
             obj.Rssa = Rssa;
         end
         
@@ -104,6 +104,30 @@ classdef Cliff < Problem
                     end
                 end
             end
+        end
+        function plotPolicy(obj, PI)
+            figure
+            hold
+            for si = 1:obj.n_states
+                [xi, yi] = getCoordinates(obj, si);
+                action_coord = [0,1;1,0;0,-1;-1,0];
+                for a = 1:obj.n_actions
+                    if PI(si,a) > 0
+                        xf = xi + action_coord(a,1);
+                        yf = yi + action_coord(a,2);
+                        q = quiver(xi,yi,(xf-xi)*PI(si,a),(yf-yi)*PI(si,a));
+                        q.Color = 'red';
+                        q.LineWidth = 2;
+                        % q.ShowArrowHead = 'off';
+                        % q.MaxHeadSize = 1;
+                        
+                        q.Marker = 'o';
+                        q.MarkerFaceColor = 'blue';
+                        q.MarkerEdgeColor = 'blue';
+                    end
+                end
+            end
+            
         end
     end
     
@@ -151,7 +175,7 @@ classdef Cliff < Problem
                 else
                     Pssa_sia(ss) = Pssa_simple(3);
                 end
-                if sw <= 12*floor(si/12) % If there is no west state
+                if sw <= 12*floor((si-1)/12) % If there is no west state
                     P_stay = P_stay + Pssa_simple(4);
                 else
                     Pssa_sia(sw) = Pssa_simple(4);
