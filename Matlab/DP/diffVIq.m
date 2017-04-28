@@ -57,6 +57,7 @@ while delta >= epsilon
     % Check stability
     delta = max(max(max(abs(Q_old-Q))));
 end
+% Get greedy policy
 Q_diff = Q(:,:,1);
 PI = problems(1).getGreedyPolicy(Q(:,:,1), epsilon);
 v_diff = getVfromQ(PI,Q_diff);

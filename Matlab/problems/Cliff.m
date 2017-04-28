@@ -100,7 +100,7 @@ classdef Cliff < Problem
                     for sf =  1:obj.n_states
                         if obj.Pssa(si,sf,a) > 0
                             [xf, yf] = getCoordinates(obj, sf);
-                            q = quiver(xi,yi,(xf-xi)*obj.Pssa(si,sf,a),(yf-yi)*obj.Pssa(si,sf,a));
+                            q = quiver(xi,yi,(xf-xi)*obj.Pssa(si,sf,a),(yf-yi)*obj.Pssa(si,sf,a),0);
                             q.Color = 'red';
                             q.LineWidth = 2;
                             % q.ShowArrowHead = 'off';

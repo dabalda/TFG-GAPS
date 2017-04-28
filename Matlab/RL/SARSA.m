@@ -19,8 +19,8 @@ terminal_states =   problem.terminal_states;
 Q = 20*rand(n_states,n_actions)-10;
 
 % Initialize Q to 0 for all terminal states
-for s = terminal_states
-    Q(s,:) = 0;
+for ts = terminal_states
+    Q(ts,:) = 0;
 end
 
 step = floor(n_episodes/100);
@@ -52,7 +52,7 @@ for i = 1:n_episodes
         a = a_next;
     end
 end
-% Calculate greedy policy
+% Get greedy policy
 PI = problem.getGreedyPolicy(Q,tolerance);
 end
 
