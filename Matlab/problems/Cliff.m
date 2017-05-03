@@ -2,11 +2,11 @@ classdef Cliff < Problem
     %RANDOMWALK Cliff Walking problem definition
     %   Parameters:
     %   gamma
-    %   slope_east
-    %   slope_north
+    %   E: 
+    %   N:
     
     properties
-        slopes;
+        winds;
     end
     methods
         function obj = Cliff(parameters) 
@@ -33,16 +33,16 @@ classdef Cliff < Problem
         
         function setPssa(obj, parameters)
             
-            % Calculate slopes as viewed from every direction
+            % Calculate winds as viewed from every direction
             rot90 = [0 -1; 1, 0];
-            se = parameters.slope_east;
-            sn = parameters.slope_north;
+            se = parameters.E;
+            sn = parameters.N;
             
-            obj.slopes = zeros(2,4);
-            obj.slopes(:,1) = [se,sn];
+            obj.winds = zeros(2,4);
+            obj.winds(:,1) = [se,sn];
             
             for i = 2:4
-                obj.slopes(:,i) = rot90*obj.slopes(:,i-1);
+                obj.winds(:,i) = rot90*obj.winds(:,i-1);
             end
             
             ns = obj.n_states;
@@ -147,17 +147,29 @@ classdef Cliff < Problem
         end
     end
     
+    methods (Static)
+        function problems = sampleUniformFamily(parameters)
+            np = parameters.n_problems;
+            gamma = parameters.gamma;
+            minE = parameters.E(1);
+            maxE = parameters.E(2);
+            minN = parameters.N(1);
+            maxN = parameters.N(2);
+            
+        end
+    end
+    
     methods (Access = 'protected')
         function Pssa_simple = getSimplePssa(obj, a)
-            slopeT = obj.slopes(:,a);
-            if slopeT(2) >= 0
-                perp1 = 1/2*(1-slopeT(2));
-                perp2 = perp1*slopeT(1);
+            windT = obj.winds(:,a);
+            if windT(2) >= 0
+                perp1 = 1/2*(1-windT(2));
+                perp2 = perp1*windT(1);
                 PTemp = [1-abs(perp2), max(0, perp2), 0, max(0,-perp2)];
             else
-                perp = 1/2*slopeT(1);
+                perp = 1/2*windT(1);
                 paral = 1-abs(perp);
-                forward = paral*(1+1/2*slopeT(2));
+                forward = paral*(1+1/2*windT(2));
                 PTemp = [forward, max(0, perp), 1-forward-abs(perp), max(0,-perp)];
             end
             Pssa_simple = [PTemp(6-a:4), PTemp(1:5-a)];
