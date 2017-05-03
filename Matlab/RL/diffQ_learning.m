@@ -1,5 +1,5 @@
-function [ PI, Q_diff, v_diff, episodes_count ] = diffSARSA( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, neighbours )
-%DIFFSARSA
+function [ PI, Q_diff, v_diff, episodes_count ] = diffQ_learning( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, neighbours )
+%DIFFQ_LEARNING
 
 narginchk(7,8);
 
@@ -32,7 +32,6 @@ discount = ones(n_problems,1); % Accumulated discount
 is_terminal = ones(n_problems,1);
 episodes_count = zeros(n_problems,1);
 s = zeros(n_problems,1);
-a = zeros(n_problems,1);
 
 while min(episodes_count) < n_episodes
     
@@ -47,9 +46,7 @@ while min(episodes_count) < n_episodes
                 s(k) = problem.sampleInitialState();
                 is_terminal(k) = problem.isTerminal(s(k));
             end
-            % Choose action using e-greedy policy from current Q
-            a(k) = problem.sampleStateEpsilonGreedyPolicy(Q(:,:,k),tolerance,s(k),epsilon);
-            
+
             % Initialize loop variables
             discount(k) = 1; % Accumulated discount
             
@@ -57,15 +54,16 @@ while min(episodes_count) < n_episodes
         
         discount(k) = discount(k)*gamma; % Update accumulated discount
         
-        % Take action a and observe r and s_next
-        [s_next, r, is_terminal(k)] = sampleTransition(problem, s(k), a(k));
         % Choose action using e-greedy policy from current Q
-        a_next = problem.sampleStateEpsilonGreedyPolicy(Q(:,:,k),tolerance,s_next,epsilon);
+        a = problem.sampleStateEpsilonGreedyPolicy(Q(:,:,k),tolerance,s(k),epsilon);
+        % Take action a and observe r and s_next
+        [s_next, r, is_terminal(k)] = sampleTransition(problem, s(k), a);
+        % Find greedy action for next state
+        greedy_a_next = problem.sampleStateGreedyPolicy(Q(:,:,k),tolerance,s_next);               
         % Update Q(s,a)
-        Q_local(s(k),a(k),k) = Q(s(k),a(k),k) + alpha*(r+gamma*Q(s_next,a_next,k)-Q(s(k),a(k),k));
-        % Update s & a
+        Q_local(s(k),a,k) = Q(s(k),a,k) + alpha*(r+gamma*Q(s_next,greedy_a_next,k)-Q(s(k),a,k));
+        % Update s
         s(k) = s_next;
-        a(k) = a_next;
         
         % Force termination after a number of steps
         is_terminal(k) = is_terminal(k) || discount(k) < discount_threshold;
@@ -75,7 +73,7 @@ while min(episodes_count) < n_episodes
             if verbose && episodes_count(k) <= n_episodes && episodes_count(k) > 0
                 format_p = '%'+num2str( length(num2str(n_problems)))+'u';
                 p = num2str(k, format_p);
-                disp(['Diff. SARSA problem ',p,' / ',num2str(n_problems),...
+                disp(['Diff. Q-learning problem ',p,' / ',num2str(n_problems),...
                     ', episode ',num2str(episodes_count(k)),' / ',num2str(n_episodes),' done.'])
             end
         end

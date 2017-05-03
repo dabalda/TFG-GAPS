@@ -79,7 +79,6 @@ classdef RandomWalk < Problem
             else              
                 is(ceil(ns/2)) = 1;
             end
-            %
             obj.initial_states = is;
         end
         
