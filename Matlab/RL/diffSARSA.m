@@ -34,7 +34,7 @@ episodes_count = zeros(n_problems,1);
 s = zeros(n_problems,1);
 a = zeros(n_problems,1);
 
-while min(episodes_count) < n_episodes
+while mean(episodes_count) < n_episodes
     
     for k = 1:n_problems % Local steps
         
