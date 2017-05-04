@@ -65,6 +65,19 @@ classdef (Abstract) Problem < handle
             PI = (1/na)*ones(ns,na);
         end
         
+        function PI = sampleRandomPolicy(obj)
+            % sampleRandomPolicy Returns a random deterministic policy for 
+            % this problem, sampled from the stochastic random policy
+            ns = obj.n_states;
+            na = obj.n_actions;
+            PI = getRandomPolicy(obj);
+            for s = 1:ns
+                a = discretesample(PI(s,:),1);
+                PI(s,:) = zeros(na,1);
+                PI(s,a) = 1;
+            end        
+        end
+        
         function PIsa = getGreedyPolicy(obj, Q, tolerance)
             % getGreedyPolicy Returns greedy policy matrix given a
             % state-action value vector and a tolerance for equal values.

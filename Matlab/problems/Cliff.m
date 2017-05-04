@@ -1,15 +1,15 @@
 classdef Cliff < Problem
     %RANDOMWALK Cliff Walking problem definition
     %   Parameters:
-    %   gamma
-    %   E: 
-    %   N:
+    %   gamma: discount factor
+    %   E: Strength of wind blowing from west to east
+    %   N: Strenght of wind blowing from south to north
     
     properties
         winds;
     end
     methods
-        function obj = Cliff(parameters) 
+        function obj = Cliff(parameters)
             % Constructor
             
             % Call superclass constructor with parameters
@@ -136,7 +136,7 @@ classdef Cliff < Problem
                         q.MarkerEdgeColor = 'blue';
                     end
                 end
-            end           
+            end
         end
         
         function plotV(~, v)
@@ -155,6 +155,19 @@ classdef Cliff < Problem
             maxE = parameters.E(2);
             minN = parameters.N(1);
             maxN = parameters.N(2);
+            
+            rangeE = maxE - minE;
+            rangeN = maxN - minN;
+            
+            problems(1,np) = Cliff();
+            
+            E = rangeE*rand(np,1)+minE;
+            N = rangeN*rand(np,1)+minN;
+            
+            for i = 1:np
+                param1 = struct('gamma',gamma,'E',E(i),'N',N(i));
+                problems(i) = Cliff(param1);
+            end
             
         end
     end
