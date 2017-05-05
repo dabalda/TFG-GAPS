@@ -1,4 +1,4 @@
-function [ PI, Q ] = SARSA( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose )
+function [ PI, Q ] = SARSA( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
 %SARSA with epsilon-greedy target policy for episodic or non-episodic MDPs.
 %   [ PI, Q ] = SARSA(problem,n_episodes,epsilon,alpha,discount_threshold,tolerance, verbose)
 %   Finds optimal policy and optimal state-action value function for the
@@ -9,14 +9,21 @@ function [ PI, Q ] = SARSA( problem, n_episodes, epsilon, alpha, discount_thresh
 %   if the MPD is non-episodic. Greedy policies select all actions whose
 %   value is not worse than the best minus tolerance.
 
+narginchk(7,8);
+
 % Get parameters
 n_states =          problem.n_states;
 n_actions =         problem.n_actions;
 gamma =             problem.gamma;
 terminal_states =   problem.terminal_states;
 
-% Initialize Q arbitrarily for all state-action pairs
-Q = 20*rand(n_states,n_actions)-10;
+% Initialize Q arbitrarily for all state-action pairs if no initial Q is
+% provided
+if nargin < 8
+    Q = 20*rand(n_states,n_actions)-10;
+else
+    Q = Q_ini;
+end
 
 % Initialize Q to 0 for all terminal states
 for ts = terminal_states
@@ -27,7 +34,7 @@ step = floor(n_episodes/100);
 for i = 1:n_episodes
     if ~mod(i,step) && verbose
         disp(['SARSA episode ',num2str(i),' of ',num2str(n_episodes)])
-    end    
+    end
     
     % Initialize s
     s = problem.sampleInitialState();

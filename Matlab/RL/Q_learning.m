@@ -1,4 +1,4 @@
-function [ PI, Q ] = Q_learning( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose )
+function [ PI, Q ] = Q_learning( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
 %Q_LEARNING with epsilon-greedy target policy for episodic or non-episodic MDPs.
 %   [ PI, Q ] = Q_learning(problem,n_episodes,epsilon,alpha,discount_threshold,tolerance, verbose)
 %   Finds optimal policy and optimal state-action value function for the
@@ -9,18 +9,25 @@ function [ PI, Q ] = Q_learning( problem, n_episodes, epsilon, alpha, discount_t
 %   if the MPD is non-episodic. Greedy policies select all actions whose
 %   value is not worse than the best minus tolerance.
 
+narginchk(7,8);
+
 % Get parameters
 n_states =          problem.n_states;
 n_actions =         problem.n_actions;
 gamma =             problem.gamma;
 terminal_states =   problem.terminal_states;
 
-% Initialize Q arbitrarily for all state-action pairs
-Q = 20*rand(n_states,n_actions)-10;
+% Initialize Q arbitrarily for all state-action pairs if no initial Q is
+% provided
+if nargin < 8
+    Q = 20*rand(n_states,n_actions)-10;
+else
+    Q = Q_ini;
+end
 
 % Initialice Q to 0 for all terminal states
-for s = terminal_states
-    Q(s,:) = 0;
+for ts = terminal_states
+    Q(ts,:) = 0;
 end
 
 step = floor(n_episodes/100);
