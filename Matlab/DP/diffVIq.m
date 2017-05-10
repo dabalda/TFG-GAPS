@@ -12,7 +12,7 @@ n_actions = problems(1).n_actions;
 terminal_states = problems(1).terminal_states;
 n_problems = length(problems);
 
-% Set neighbours if no matrix is provided
+% Set neighbours as fully connected if no matrix is provided
 if nargin < 4
     neighbours = 1/(n_problems)*ones(n_problems);
 end
