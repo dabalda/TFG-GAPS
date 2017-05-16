@@ -1,4 +1,4 @@
-function [ PI, Q, episodes_count ] = Q_learning( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, Q_ini )
+function [ PI, Q, episodes_count ] = Q_learning( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_ep, Q_ini )
 %Q_LEARNING with epsilon-greedy target policy for episodic or non-episodic MDPs.
 %   [ PI, Q, episodes_count ] = Q_learning( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, Q_ini )
 %   Finds optimal policy and optimal state-action value function for the
@@ -12,7 +12,7 @@ function [ PI, Q, episodes_count ] = Q_learning( problem, n_episodes, epsilon, a
 %   Greedy policies select all actions whose value is not worse than the 
 %   best minus tolerance..
 
-narginchk(8,9);
+narginchk(9,10);
 
 % Get parameters
 n_states =          problem.n_states;
@@ -22,7 +22,7 @@ terminal_states =   problem.terminal_states;
 
 % Initialize Q arbitrarily for all state-action pairs if no initial Q is
 % provided
-if nargin < 9
+if nargin < 10
     Q = 20*rand(n_states,n_actions)-10;
 else
     Q = Q_ini;
@@ -35,10 +35,12 @@ end
 
 step = floor(n_episodes/100);
 episodes_count = 0;
-delta = inf;
-while episodes_count < n_episodes && delta > stability_threshold
+stable_ep = 0;
+while episodes_count < n_episodes && stable_ep < min_stable_ep%delta >= stability_threshold
     episodes_count = episodes_count + 1;
-    delta = 0;
+    % Save old Q
+    Q_old = Q; 
+    
     if verbose
         if n_episodes == inf
             disp(['Q-learning episode ',num2str(episodes_count)])
@@ -63,14 +65,18 @@ while episodes_count < n_episodes && delta > stability_threshold
         [s_next, r, is_terminal] = problem.sampleTransition(s,a);
         % Find greedy action for next state
         greedy_a_next = problem.sampleStateGreedyPolicy(Q,tolerance,s_next);
-        % Save old Q
-        Q_old = Q; 
         % Update Q(s,a)
         Q(s,a) = Q(s,a) + alpha*(r+gamma*Q(s_next, greedy_a_next)-Q(s,a));
         % Update s
-        s = s_next;
-        % Check stability
-        delta = max(max(max(abs(Q_old-Q))), delta);
+        s = s_next;       
+    end
+    % Check stability
+    delta = sum(sum(abs(Q_old-Q)));
+    if delta < stability_threshold
+        stable_ep = stable_ep + 1;
+        disp([num2str(stable_ep), ' stable episodes out of ',num2str(min_stable_ep)]);
+    else
+        stable_ep = 0;
     end
 end
 % Calculate greedy policy
