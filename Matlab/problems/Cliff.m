@@ -107,8 +107,19 @@ classdef Cliff < Problem
                             % q.MaxHeadSize = 1;
                             
                             q.Marker = 'o';
-                            q.MarkerFaceColor = 'blue';
-                            q.MarkerEdgeColor = 'blue';
+                            q.MarkerFaceColor = 'yellow';
+                            q.MarkerEdgeColor = 'yellow';
+                            if any(si == 2:11)
+                                q.Marker = 's';
+                                q.MarkerFaceColor = 'blue';
+                                q.MarkerEdgeColor = 'blue';
+                                q.Color = 'black';
+                            elseif si == 12
+                                q.Marker = 'd';
+                                q.MarkerFaceColor = 'green';
+                                q.MarkerEdgeColor = 'green';
+                                q.LineStyle = ':';                          
+                            end  
                         end
                     end
                 end
@@ -132,8 +143,20 @@ classdef Cliff < Problem
                         % q.MaxHeadSize = 1;
                         
                         q.Marker = 'o';
-                        q.MarkerFaceColor = 'blue';
-                        q.MarkerEdgeColor = 'blue';
+                        q.MarkerFaceColor = 'yellow';
+                        q.MarkerEdgeColor = 'yellow';
+                        if any(si == 2:11)
+                            q.Marker = 's';
+                            q.MarkerFaceColor = 'blue';
+                            q.MarkerEdgeColor = 'blue';
+                            q.Color = 'black';
+                            q.LineStyle = ':';
+                        elseif si == 12
+                            q.Marker = 'd';
+                            q.MarkerFaceColor = 'green';
+                            q.MarkerEdgeColor = 'green';
+                            q.LineStyle = 'none';                          
+                        end                       
                     end
                 end
             end

@@ -1,4 +1,4 @@
-function [ PI, Q, episodes_count ] = Q_learning( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_ep, Q_ini )
+function [ PI, Q, episodes_count, n_samples ] = Q_learning( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_ep, Q_ini )
 %Q_LEARNING with epsilon-greedy target policy for episodic or non-episodic MDPs.
 %   [ PI, Q, episodes_count ] = Q_learning( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, Q_ini )
 %   Finds optimal policy and optimal state-action value function for the
@@ -33,10 +33,18 @@ for ts = terminal_states
     Q(ts,:) = 0;
 end
 
+% Alpha setup
+if alpha ~= 'decreasing'
+    alpha_n = alpha; 
+end
+
+% Number of samples for each state-action pair
+n_samples = zeros(n_states, n_actions);
+
 step = floor(n_episodes/100);
 episodes_count = 0;
 stable_ep = 0;
-while episodes_count < n_episodes && stable_ep < min_stable_ep%delta >= stability_threshold
+while episodes_count < n_episodes && stable_ep <= min_stable_ep%delta >= stability_threshold
     episodes_count = episodes_count + 1;
     % Save old Q
     Q_old = Q; 
@@ -65,16 +73,22 @@ while episodes_count < n_episodes && stable_ep < min_stable_ep%delta >= stabilit
         [s_next, r, is_terminal] = problem.sampleTransition(s,a);
         % Find greedy action for next state
         greedy_a_next = problem.sampleStateGreedyPolicy(Q,tolerance,s_next);
+        % Update sample count
+        n_samples(s,a) = n_samples(s,a) + 1;
+        % If alpha is decreasing, set alpha_n
+        if alpha == 'decreasing'
+            alpha_n = 1/(n_samples(s,a)^(sqrt(0.5)));
+        end
         % Update Q(s,a)
-        Q(s,a) = Q(s,a) + alpha*(r+gamma*Q(s_next, greedy_a_next)-Q(s,a));
+        Q(s,a) = Q(s,a) + alpha_n*(r+gamma*Q(s_next, greedy_a_next)-Q(s,a));
         % Update s
         s = s_next;       
     end
     % Check stability
-    delta = sum(sum(abs(Q_old-Q)));
+    delta = sum(sum(abs(Q_old-Q)))/sum(sum(abs(Q_old)));
     if delta < stability_threshold
         stable_ep = stable_ep + 1;
-        disp([num2str(stable_ep), ' stable episodes out of ',num2str(min_stable_ep)]);
+        disp(['Q-learning, ',num2str(stable_ep), ' stable episodes out of ',num2str(min_stable_ep)]);
     else
         stable_ep = 0;
     end
