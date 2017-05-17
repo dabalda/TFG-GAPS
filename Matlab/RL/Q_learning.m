@@ -88,7 +88,9 @@ while episodes_count < n_episodes && stable_ep < min_stable_ep%delta >= stabilit
     delta = sum(sum(abs(Q_old-Q)))/sum(sum(abs(Q_old)));
     if delta < stability_threshold
         stable_ep = stable_ep + 1;
-        disp(['Q-learning, ',num2str(stable_ep), ' stable episodes out of ',num2str(min_stable_ep)]);
+        if verbose >= 2
+            disp(['Q-learning, ',num2str(stable_ep), ' stable episodes out of ',num2str(min_stable_ep)]);
+        end
     else
         stable_ep = 0;
     end

@@ -1,4 +1,4 @@
-function [ PI, Q_diff, v_diff, episodes_count ] = diffQ_learning( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_it, neighbours )
+function [ PI, Q_diff, v_diff, episodes_count, n_samples ] = diffQ_learning( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_steps, neighbours )
 %DIFFQ_LEARNING
 
 narginchk(9,10);
@@ -40,10 +40,10 @@ n_samples = zeros(n_states, n_actions, n_problems);
 discount = ones(n_problems,1); % Accumulated discount
 is_terminal = ones(n_problems,1);
 episodes_count = zeros(n_problems,1);
-stable_it = 0;
+stable_steps = 0;
 s = zeros(n_problems,1);
 
-while mean(episodes_count) < n_episodes && stable_it < min_stable_it
+while mean(episodes_count) < n_episodes && stable_steps < min_stable_steps
     
     for k = 1:n_problems % Local steps
         
@@ -108,10 +108,12 @@ while mean(episodes_count) < n_episodes && stable_it < min_stable_it
     % Check stability
     delta = sum(sum(sum(abs(Q_old-Q))))/sum(sum(sum(abs(Q_old))));
     if delta < stability_threshold
-        stable_it = stable_it + 1;
-        disp(['Diff. Q-learning, ',num2str(stable_it), ' stable episodes out of ',num2str(min_stable_ep)]);
+        stable_steps = stable_steps + 1;
+        if verbose >= 2
+            disp(['Diff. Q-learning, ',num2str(stable_steps), ' stable steps out of ',num2str(min_stable_steps)]);
+        end
     else
-        stable_it = 0;
+        stable_steps = 0;
     end
     
 end % of all episodes
