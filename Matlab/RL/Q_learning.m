@@ -3,7 +3,7 @@ function [ PI, Q, episodes_count, n_samples ] = Q_learning( problem, n_episodes,
 %   [ PI, Q, episodes_count ] = Q_learning( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, Q_ini )
 %   Finds optimal policy and optimal state-action value function for the
 %   problem iterating over n_episodes episodes with epsilon-greedy policy
-%   using a constant alpha as step-size sequence. 
+%   using a constant or decreasing alpha as step-size sequence. 
 %   If n_episodes = inf, then iterations will continue until Q changes less 
 %   than stability_threshold between iterations. 
 %   An episode is terminated if it reaches a terminal state or if the 

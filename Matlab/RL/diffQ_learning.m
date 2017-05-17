@@ -27,6 +27,14 @@ end
 % Initialize local Q
 Q_local = Q;
 
+% Alpha setup
+if alpha ~= 'decreasing'
+    alpha_n = alpha; 
+end
+
+% Number of samples for each state-action pair
+n_samples = zeros(n_states, n_actions, n_problems);
+
 % Initialize loop variables
 discount = ones(n_problems,1); % Accumulated discount
 is_terminal = ones(n_problems,1);
@@ -60,8 +68,14 @@ while mean(episodes_count) < n_episodes
         [s_next, r, is_terminal(k)] = sampleTransition(problem, s(k), a);
         % Find greedy action for next state
         greedy_a_next = problem.sampleStateGreedyPolicy(Q(:,:,k),tolerance,s_next);               
+        % Update sample count
+        n_samples(s(k),a,k) = n_samples(s(k),a,k) + 1;
+        % If alpha is decreasing, set alpha_n
+        if alpha == 'decreasing'
+            alpha_n = 1/(n_samples(s(k),a,k)^(sqrt(0.5)));
+        end
         % Update Q(s,a)
-        Q_local(s(k),a,k) = Q(s(k),a,k) + alpha*(r+gamma*Q(s_next,greedy_a_next,k)-Q(s(k),a,k));
+        Q_local(s(k),a,k) = Q(s(k),a,k) + alpha_n*(r+gamma*Q(s_next,greedy_a_next,k)-Q(s(k),a,k));
         % Update s
         s(k) = s_next;
         
