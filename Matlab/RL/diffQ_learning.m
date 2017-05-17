@@ -45,11 +45,11 @@ s = zeros(n_problems,1);
 
 while mean(episodes_count) < n_episodes && stable_steps < min_stable_steps
     
+    Q_old = Q;
     for k = 1:n_problems % Local steps
         
         problem = problems(k);
         gamma = problem.gamma;
-        Q_old(:,:,k) = Q(:,:,k);
         
         if is_terminal(k) % Initialize new episode
             % Initialize to a non terminal state

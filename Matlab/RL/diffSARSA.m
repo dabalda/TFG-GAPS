@@ -1,7 +1,7 @@
-function [ PI, Q_diff, v_diff, episodes_count ] = diffSARSA( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, neighbours )
+function [ PI, Q_diff, v_diff, episodes_count, n_samples ] = diffSARSA( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_steps, neighbours )
 %DIFFSARSA
 
-narginchk(7,8);
+narginchk(9,10);
 
 % Get parameters
 n_states = problems(1).n_states;
@@ -9,7 +9,7 @@ n_actions = problems(1).n_actions;
 n_problems = length(problems);
 
 % Set neighbours if no matrix is provided
-if nargin < 8
+if nargin < 10
     neighbours = 1/(n_problems)*ones(n_problems);
 end
 
@@ -26,16 +26,27 @@ end
 
 % Initialize local Q
 Q_local = Q;
+Q_old = Q;
+
+% Alpha setup
+if alpha ~= 'decreasing'
+    alpha_n = alpha; 
+end
+
+% Number of samples for each state-action pair
+n_samples = zeros(n_states, n_actions, n_problems);
 
 % Initialize loop variables
 discount = ones(n_problems,1); % Accumulated discount
 is_terminal = ones(n_problems,1);
 episodes_count = zeros(n_problems,1);
+stable_steps = 0;
 s = zeros(n_problems,1);
 a = zeros(n_problems,1);
 
-while mean(episodes_count) < n_episodes
+while mean(episodes_count) < n_episodes && stable_steps < min_stable_steps
     
+    Q_old = Q;
     for k = 1:n_problems % Local steps
         
         problem = problems(k);
@@ -61,8 +72,14 @@ while mean(episodes_count) < n_episodes
         [s_next, r, is_terminal(k)] = sampleTransition(problem, s(k), a(k));
         % Choose action using e-greedy policy from current Q
         a_next = problem.sampleStateEpsilonGreedyPolicy(Q(:,:,k),tolerance,s_next,epsilon);
+        % Update sample count
+        n_samples(s(k),a(k),k) = n_samples(s(k),a(k),k) + 1;
+        % If alpha is decreasing, set alpha_n
+        if alpha == 'decreasing'
+            alpha_n = 1/(n_samples(s(k),a(k),k)^(sqrt(0.5)));
+        end
         % Update Q(s,a)
-        Q_local(s(k),a(k),k) = Q(s(k),a(k),k) + alpha*(r+gamma*Q(s_next,a_next,k)-Q(s(k),a(k),k));
+        Q_local(s(k),a(k),k) = Q(s(k),a(k),k) + alpha_n*(r+gamma*Q(s_next,a_next,k)-Q(s(k),a(k),k));
         % Update s & a
         s(k) = s_next;
         a(k) = a_next;
@@ -89,6 +106,16 @@ while mean(episodes_count) < n_episodes
             % Update diffusion Qk with local Qkk
             Q(:,:,k) = Q(:,:,k) + Q_local(:,:,kk)* neighbours(k,kk);
         end
+    end
+    % Check stability
+    delta = sum(sum(sum(abs(Q_old-Q))))/sum(sum(sum(abs(Q_old))));
+    if delta < stability_threshold
+        stable_steps = stable_steps + 1;
+        if verbose >= 2
+            disp(['Diff. SARSA, ',num2str(stable_steps), ' stable steps out of ',num2str(min_stable_steps)]);
+        end
+    else
+        stable_steps = 0;
     end
     
 end % of all episodes
