@@ -44,7 +44,7 @@ n_samples = zeros(n_states, n_actions);
 step = floor(n_episodes/100);
 episodes_count = 0;
 stable_ep = 0;
-while episodes_count < n_episodes && stable_ep <= min_stable_ep%delta >= stability_threshold
+while episodes_count < n_episodes && stable_ep < min_stable_ep%delta >= stability_threshold
     episodes_count = episodes_count + 1;
     % Save old Q
     Q_old = Q; 

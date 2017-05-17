@@ -1,7 +1,7 @@
-function [ PI, Q_diff, v_diff, episodes_count ] = diffQ_learning( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, neighbours )
+function [ PI, Q_diff, v_diff, episodes_count ] = diffQ_learning( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_it, neighbours )
 %DIFFQ_LEARNING
 
-narginchk(7,8);
+narginchk(9,10);
 
 % Get parameters
 n_states = problems(1).n_states;
@@ -9,7 +9,7 @@ n_actions = problems(1).n_actions;
 n_problems = length(problems);
 
 % Set neighbours if no matrix is provided
-if nargin < 8
+if nargin < 10
     neighbours = 1/(n_problems)*ones(n_problems);
 end
 
@@ -26,6 +26,7 @@ end
 
 % Initialize local Q
 Q_local = Q;
+Q_old = Q;
 
 % Alpha setup
 if alpha ~= 'decreasing'
@@ -39,14 +40,16 @@ n_samples = zeros(n_states, n_actions, n_problems);
 discount = ones(n_problems,1); % Accumulated discount
 is_terminal = ones(n_problems,1);
 episodes_count = zeros(n_problems,1);
+stable_it = 0;
 s = zeros(n_problems,1);
 
-while mean(episodes_count) < n_episodes
+while mean(episodes_count) < n_episodes && stable_it < min_stable_it
     
     for k = 1:n_problems % Local steps
         
         problem = problems(k);
         gamma = problem.gamma;
+        Q_old(:,:,k) = Q(:,:,k);
         
         if is_terminal(k) % Initialize new episode
             % Initialize to a non terminal state
@@ -101,6 +104,14 @@ while mean(episodes_count) < n_episodes
             % Update diffusion Qk with local Qkk
             Q(:,:,k) = Q(:,:,k) + Q_local(:,:,kk)* neighbours(k,kk);
         end
+    end
+    % Check stability
+    delta = sum(sum(sum(abs(Q_old-Q))))/sum(sum(sum(abs(Q_old))));
+    if delta < stability_threshold
+        stable_it = stable_it + 1;
+        disp(['Diff. Q-learning, ',num2str(stable_it), ' stable episodes out of ',num2str(min_stable_ep)]);
+    else
+        stable_it = 0;
     end
     
 end % of all episodes
