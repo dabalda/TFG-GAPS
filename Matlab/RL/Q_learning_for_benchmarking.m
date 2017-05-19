@@ -1,18 +1,18 @@
-function [ PI, Q, episodes_count, n_samples ] = Q_learning( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_ep, Q_ini )
-%Q_LEARNING with epsilon-greedy target policy for episodic or non-episodic MDPs.
+function [ PI, Q, episodes_count, n_samples ] = Q_learning_for_benchmarking( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_ep, Q_opt, Q_ini)
+%Q_LEARNING_FOR_BENCHMARKING with epsilon-greedy target policy for episodic or non-episodic MDPs.
 %   [ PI, Q, episodes_count ] = Q_learning( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, Q_ini )
 %   Finds optimal policy and optimal state-action value function for the
 %   problem iterating over n_episodes episodes with epsilon-greedy policy
 %   using a constant or decreasing alpha as step-size sequence. 
-%   If n_episodes = inf, then iterations will continue until Q changes less 
-%   than stability_threshold between iterations. 
+%   If n_episodes = inf, then iterations will continue until Q is closer 
+%   than stability_threshold to the optimal Q.
 %   An episode is terminated if it reaches a terminal state or if the 
 %   accumulated discount factor becomes smaller than discount_threshold. 
 %   Discount threshold can't be 0 if the MPD is non-episodic. 
 %   Greedy policies select all actions whose value is not worse than the 
 %   best minus tolerance.
 
-narginchk(9,10);
+narginchk(10,11);
 
 % Get parameters
 n_states =          problem.n_states;
@@ -22,7 +22,7 @@ terminal_states =   problem.terminal_states;
 
 % Initialize Q arbitrarily for all state-action pairs if no initial Q is
 % provided
-if nargin < 10
+if nargin < 11
     Q = 20*rand(n_states,n_actions)-10;
 else
     Q = Q_ini;
@@ -46,8 +46,6 @@ episodes_count = 0;
 stable_ep = 0;
 while episodes_count < n_episodes && stable_ep < min_stable_ep%delta >= stability_threshold
     episodes_count = episodes_count + 1;
-    % Save old Q
-    Q_old = Q; 
     
     if verbose
         if n_episodes == inf
@@ -84,8 +82,8 @@ while episodes_count < n_episodes && stable_ep < min_stable_ep%delta >= stabilit
         % Update s
         s = s_next;       
     end
-    % Check stability
-    delta = sum(sum(abs(Q_old-Q)))/sum(sum(abs(Q_old)));
+    % Check similarity to optimal Q
+    delta = sum(sum(abs(Q_opt-Q)))/sum(sum(abs(Q_opt)));
     if delta < stability_threshold
         stable_ep = stable_ep + 1;
         if verbose >= 2
