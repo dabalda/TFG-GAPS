@@ -120,8 +120,12 @@ while mean(episodes_count) < n_episodes && stable_steps < min_stable_steps
 end % of all episodes
 
 % Get greedy policy
-Q_diff = Q(:,:,1);
-PI_diff = problems(1).getGreedyPolicy(Q(:,:,1), epsilon);
-v_diff = getVfromQ(PI_diff,Q_diff);
+Q_diff = Q;
+PI_diff = zeros(n_states, n_actions, n_problems);
+v_diff = zeros(n_states, n_problems);
+for p = 1:n_problems
+    PI_diff(:,:,p) = problems(p).getGreedyPolicy(Q(:,:,p), epsilon);
+    v_diff(:,p) = getVfromQ(PI_diff(:,:,p),Q_diff(:,:,p));
+end
 end
 

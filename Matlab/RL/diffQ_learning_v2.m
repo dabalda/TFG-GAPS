@@ -1,5 +1,5 @@
-function [ PI_diff, Q_diff, v_diff, episodes_count, n_samples ] = diffSARSA( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_steps, neighbours )
-%DIFFSARSA
+function [ PI_diff, Q_diff, v_diff, episodes_count, n_samples ] = diffQ_learning_v2( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_steps, neighbours )
+%DIFFQ_LEARNING_v2
 
 narginchk(9,10);
 
@@ -41,7 +41,6 @@ is_terminal = ones(n_problems,1);
 episodes_count = zeros(n_problems,1);
 stable_steps = 0;
 s = zeros(n_problems,1);
-a = zeros(n_problems,1);
 
 while mean(episodes_count) < n_episodes && stable_steps < min_stable_steps
     
@@ -57,9 +56,7 @@ while mean(episodes_count) < n_episodes && stable_steps < min_stable_steps
                 s(k) = problem.sampleInitialState();
                 is_terminal(k) = problem.isTerminal(s(k));
             end
-            % Choose action using e-greedy policy from current Q
-            a(k) = problem.sampleStateEpsilonGreedyPolicy(Q(:,:,k),tolerance,s(k),epsilon);
-            
+
             % Initialize loop variables
             discount(k) = 1; % Accumulated discount
             
@@ -67,21 +64,22 @@ while mean(episodes_count) < n_episodes && stable_steps < min_stable_steps
         
         discount(k) = discount(k)*gamma; % Update accumulated discount
         
-        % Take action a and observe r and s_next
-        [s_next, r, is_terminal(k)] = sampleTransition(problem, s(k), a(k));
         % Choose action using e-greedy policy from current Q
-        a_next = problem.sampleStateEpsilonGreedyPolicy(Q(:,:,k),tolerance,s_next,epsilon);
+        a = problem.sampleStateEpsilonGreedyPolicy(Q(:,:,k),tolerance,s(k),epsilon);
+        % Take action a and observe r and s_next
+        [s_next, r, is_terminal(k)] = sampleTransition(problem, s(k), a);
+        % Find greedy action for next state
+        greedy_a_next = problem.sampleStateGreedyPolicy(Q(:,:,k),tolerance,s_next);               
         % Update sample count
-        n_samples(s(k),a(k),k) = n_samples(s(k),a(k),k) + 1;
+        n_samples(s(k),a,k) = n_samples(s(k),a,k) + 1;
         % If alpha is decreasing, set alpha_n
         if alpha == 'decreasing'
-            alpha_n = 1/(n_samples(s(k),a(k),k)^(sqrt(0.5)));
+            alpha_n = 1/(n_samples(s(k),a,k)^(sqrt(0.5)));
         end
         % Update Q(s,a)
-        Q_local(s(k),a(k),k) = Q(s(k),a(k),k) + alpha_n*(r+gamma*Q(s_next,a_next,k)-Q(s(k),a(k),k));
-        % Update s & a
+        Q_local(s(k),a,k) = Q(s(k),a,k) + alpha_n*(r+gamma*Q(s_next,greedy_a_next,k)-Q(s(k),a,k));
+        % Update s
         s(k) = s_next;
-        a(k) = a_next;
         
         % Force termination after a number of steps
         is_terminal(k) = is_terminal(k) || discount(k) < discount_threshold;
@@ -91,7 +89,7 @@ while mean(episodes_count) < n_episodes && stable_steps < min_stable_steps
             if verbose && episodes_count(k) <= n_episodes && episodes_count(k) > 0
                 format_p = '%'+num2str( length(num2str(n_problems)))+'u';
                 p = num2str(k, format_p);
-                disp(['Diff. SARSA problem ',p,' / ',num2str(n_problems),...
+                disp(['Diff. Q-learning problem ',p,' / ',num2str(n_problems),...
                     ', episode ',num2str(episodes_count(k)),' / ',num2str(n_episodes),' done.'])
             end
         end
@@ -111,7 +109,7 @@ while mean(episodes_count) < n_episodes && stable_steps < min_stable_steps
     if delta < stability_threshold
         stable_steps = stable_steps + 1;
         if verbose >= 2
-            disp(['Diff. SARSA, ',num2str(stable_steps), ' stable steps out of ',num2str(min_stable_steps)]);
+            disp(['Diff. Q-learning, ',num2str(stable_steps), ' stable steps out of ',num2str(min_stable_steps)]);
         end
     else
         stable_steps = 0;
@@ -120,8 +118,12 @@ while mean(episodes_count) < n_episodes && stable_steps < min_stable_steps
 end % of all episodes
 
 % Get greedy policy
-Q_diff = Q(:,:,1);
-PI_diff = problems(1).getGreedyPolicy(Q(:,:,1), epsilon);
-v_diff = getVfromQ(PI_diff,Q_diff);
+Q_diff = Q;
+PI_diff = zeros(n_states, n_actions, n_problems);
+v_diff = zeros(n_states, n_problems);
+for p = 1:n_problems
+    PI_diff(:,:,p) = problems(p).getGreedyPolicy(Q(:,:,p), epsilon);
+    v_diff(:,p) = getVfromQ(PI_diff(:,:,p),Q_diff(:,:,p));
+end
 end
 

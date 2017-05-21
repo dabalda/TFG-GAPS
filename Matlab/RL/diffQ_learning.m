@@ -1,4 +1,4 @@
-function [ PI, Q_diff, v_diff, episodes_count, n_samples ] = diffQ_learning( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_steps, neighbours )
+function [ PI_diff, Q_diff, v_diff, episodes_count, n_samples ] = diffQ_learning( problems, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, stability_threshold, min_stable_steps, neighbours )
 %DIFFQ_LEARNING
 
 narginchk(9,10);
@@ -26,7 +26,6 @@ end
 
 % Initialize local Q
 Q_local = Q;
-Q_old = Q;
 
 % Alpha setup
 if alpha ~= 'decreasing'
@@ -120,7 +119,7 @@ end % of all episodes
 
 % Get greedy policy
 Q_diff = Q(:,:,1);
-PI = problems(1).getGreedyPolicy(Q(:,:,1), epsilon);
-v_diff = getVfromQ(PI,Q_diff);
+PI_diff = problems(1).getGreedyPolicy(Q(:,:,1), epsilon);
+v_diff = getVfromQ(PI_diff,Q_diff);
 end
 
