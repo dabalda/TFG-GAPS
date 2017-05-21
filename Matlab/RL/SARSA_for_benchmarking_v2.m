@@ -1,6 +1,6 @@
-function [ PI, Q, episodes_count, n_samples, G ] = Q_learning_for_benchmarking_v2( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
-%Q_LEARNING_for_benchmarking_v2 with epsilon-greedy behavior policy for episodic or non-episodic MDPs.
-%   [ PI, Q, episodes_count, n_samples, G ] = Q_learning_for_benchmarking_v2( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
+function [ PI, Q, episodes_count, n_samples, G ] = SARSA_for_benchmarking_v2( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
+%SARSA_for_benchmarking_v2 with epsilon-greedy target policy for episodic or non-episodic MDPs.
+%   [ PI, Q, episodes_count, n_samples, G ] = SARSA_for_benchmarking_v2( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
 %   Finds optimal policy and optimal state-action value function for the
 %   problem iterating over n_episodes episodes with epsilon-greedy policy
 %   using a constant or decreasing alpha as step-size sequence. 
@@ -11,7 +11,6 @@ function [ PI, Q, episodes_count, n_samples, G ] = Q_learning_for_benchmarking_v
 %   best minus tolerance.
 %   Initial state is forced to always be state 1 for benchmarking with
 %   cliff problem.
-
 narginchk(7,8);
 
 % Get parameters
@@ -30,7 +29,7 @@ else
     Q = Q_ini;
 end
 
-% Initialice Q to 0 for all terminal states
+% Initialize Q to 0 for all terminal states
 for ts = terminal_states
     Q(ts,:) = 0;
 end
@@ -47,13 +46,15 @@ step = floor(n_episodes/100);
 episodes_count = 0;
 while episodes_count < n_episodes
     episodes_count = episodes_count + 1;
-    
+
     if verbose && ~mod(episodes_count,step)
-        disp(['Q-learning episode ',num2str(episodes_count),' of ',num2str(n_episodes)])
+        disp(['SARSA episode ',num2str(episodes_count),' of ',num2str(n_episodes)])
     end
     
     % Initialize s
-    s = 1;
+    s = problem.sampleInitialState();
+    % Choose action using e-greedy policy from current Q
+    a = problem.sampleStateEpsilonGreedyPolicy(Q,tolerance,s,epsilon);
     first_visit = 1;
     
     % Initialize loop variables
@@ -63,28 +64,29 @@ while episodes_count < n_episodes
     while discount > discount_threshold && ~is_terminal
         discount = discount*gamma; % Update accumulated discount
         
-        % Choose action using e-greedy policy from current Q
-        a = problem.sampleStateEpsilonGreedyPolicy(Q,tolerance,s,epsilon);
         % Take action a and observe r and s_next
-        [s_next, r, is_terminal] = problem.sampleTransition(s,a);
-        % Find greedy action for next state
-        greedy_a_next = problem.sampleStateGreedyPolicy(Q,tolerance,s_next);
+        [s_next, r, is_terminal] = sampleTransition(problem, s, a);
+        % Choose action using e-greedy policy from current Q
+        a_next = problem.sampleStateEpsilonGreedyPolicy(Q,tolerance,s_next,epsilon);
         % Update sample count
         n_samples(s,a) = n_samples(s,a) + 1;
         % If alpha is decreasing, set alpha_n
         if alpha == 'decreasing'
             alpha_n = 1/(n_samples(s,a)^(sqrt(0.5)));
-        end
+        end 
         % Update Q(s,a)
-        Q(s,a) = Q(s,a) + alpha_n*(r+gamma*Q(s_next, greedy_a_next)-Q(s,a));
+        Q(s,a) = Q(s,a) + alpha_n*(r+gamma*Q(s_next,a_next)-Q(s,a));
+        
         if s == 1 && first_visit
-            G(episodes_count) = r+gamma*Q(s_next, greedy_a_next);
+            G(episodes_count) = r+gamma*Q(s_next,a_next);
             first_visit = 0;
         end
-        % Update s
-        s = s_next;       
-    end
+        % Update s & a
+        s = s_next;
+        a = a_next;
+    end    
 end
-% Calculate greedy policy
+% Get greedy policy
 PI = problem.getGreedyPolicy(Q,tolerance);
 end
+
