@@ -1,2 +1,2 @@
 # TFG-GAPS
-Final Degree Project in GAPS, ETSIT UPM
+Final Degree Project at GAPS, ETSIT UPM
