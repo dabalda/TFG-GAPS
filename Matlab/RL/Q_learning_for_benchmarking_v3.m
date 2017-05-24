@@ -1,6 +1,6 @@
 function [ PI, Q, episodes_count, n_samples, G ] = Q_learning_for_benchmarking_v3( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
 %Q_LEARNING_for_benchmarking_v3 with epsilon-greedy behavior policy for episodic or non-episodic MDPs.
-%   [ PI, Q, episodes_count, n_samples, G ] = Q_learning_for_benchmarking_v2( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
+%   [ PI, Q, episodes_count, n_samples, G ] = Q_learning_for_benchmarking_v3( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
 %   Finds optimal policy and optimal state-action value function for the
 %   problem iterating over n_episodes episodes with epsilon-greedy policy
 %   using a constant or decreasing alpha as step-size sequence. 

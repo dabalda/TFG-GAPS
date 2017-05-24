@@ -1,6 +1,6 @@
 function [ PI, Q, episodes_count, n_samples, G ] = SARSA_for_benchmarking_v3( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
 %SARSA_for_benchmarking_v3 with epsilon-greedy target policy for episodic or non-episodic MDPs.
-%   [ PI, Q, episodes_count, n_samples, G ] = SARSA_for_benchmarking_v2( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
+%   [ PI, Q, episodes_count, n_samples, G ] = SARSA_for_benchmarking_v3( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
 %   Finds optimal policy and optimal state-action value function for the
 %   problem iterating over n_episodes episodes with epsilon-greedy policy
 %   using a constant or decreasing alpha as step-size sequence. 
@@ -19,8 +19,6 @@ n_states =          problem.n_states;
 n_actions =         problem.n_actions;
 gamma =             problem.gamma;
 terminal_states =   problem.terminal_states;
-
-G = zeros(n_episodes, 1);
 
 % Initialize Q arbitrarily for all state-action pairs if no initial Q is
 % provided
@@ -56,7 +54,7 @@ while episodes_count < n_episodes
     end
     
     % Initialize s
-    s = 1
+    s = 1;
     % Choose action using e-greedy policy from current Q
     a = problem.sampleStateEpsilonGreedyPolicy(Q,tolerance,s,epsilon);
     % Number of steps taken in current episode
