@@ -9,8 +9,6 @@ function [ PI, Q, episodes_count, n_samples, G ] = Q_learning_for_benchmarking_v
 %   Discount threshold can't be 0 if the MPD is non-episodic. 
 %   Greedy policies select all actions whose value is not worse than the 
 %   best minus tolerance.
-%   Initial state is forced to always be state 1 for benchmarking with
-%   cliff problem.
 
 narginchk(7,8);
 
@@ -54,7 +52,7 @@ while episodes_count < n_episodes
     end
     
     % Initialize s
-    s = 1;
+    s = problem.sampleInitialState();
     
     % Initialize loop variables
     discount = 1; % Accumulated discount
