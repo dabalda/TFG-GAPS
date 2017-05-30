@@ -1,6 +1,6 @@
-function [ PI, Q, episodes_count, n_samples, G ] = SARSA_for_benchmarking_v3( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
+function [ PI, Q, episodes_count, n_samples, G, Q_hist ] = SARSA_for_benchmarking_v3( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
 %SARSA_for_benchmarking_v3 with epsilon-greedy target policy for episodic or non-episodic MDPs.
-%   [ PI, Q, episodes_count, n_samples, G ] = SARSA_for_benchmarking_v3( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
+%   [ PI, Q, episodes_count, n_samples, G, Q_hist ] = SARSA_for_benchmarking_v3( problem, n_episodes, epsilon, alpha, discount_threshold, tolerance, verbose, Q_ini )
 %   Finds optimal policy and optimal state-action value function for the
 %   problem iterating over n_episodes episodes with epsilon-greedy policy
 %   using a constant or decreasing alpha as step-size sequence. 
@@ -30,6 +30,9 @@ end
 for ts = terminal_states
     Q(ts,:) = 0;
 end
+
+% Q history
+Q_hist = zeros(n_states, n_actions, n_episodes);
 
 % Alpha setup
 if alpha ~= 'decreasing'
@@ -76,6 +79,7 @@ while episodes_count < n_episodes
             alpha_n = 1/(n_samples(s,a)^(sqrt(0.5)));
         end 
         % Update Q(s,a)
+        Q_hist(:,:,episodes_count) = Q;
         Q(s,a) = Q(s,a) + alpha_n*(r+gamma*Q(s_next,a_next)-Q(s,a));       
         G(episodes_count) = G(episodes_count) + r*gamma^n_steps;
         n_steps = n_steps + 1;
