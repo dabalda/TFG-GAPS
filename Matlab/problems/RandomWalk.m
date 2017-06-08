@@ -103,13 +103,16 @@ classdef RandomWalk < Problem
                             q.LineWidth = 2;
                             % q.ShowArrowHead = 'off';
                             % q.MaxHeadSize = 1;
+                            q.MaxHeadSize = 1/(obj.Pssa(si,sf,a));
                             
                             q.Marker = 'o';
                             q.MarkerFaceColor = 'blue';
                             q.MarkerEdgeColor = 'blue';
+                            
                         end
                     end
                 end
+                axis off
             end
         end
     end
