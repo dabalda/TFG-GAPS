@@ -100,11 +100,11 @@ classdef Cliff < Problem
                     for sf =  1:obj.n_states
                         if obj.Pssa(si,sf,a) > 0
                             [xf, yf] = getCoordinates(obj, sf);
-                            q = quiver(xi,yi,(xf-xi)*obj.Pssa(si,sf,a),(yf-yi)*obj.Pssa(si,sf,a),0);
+                            q = quiver(xi,yi,(xf-xi)*obj.Pssa(si,sf,a)*1/2,(yf-yi)*obj.Pssa(si,sf,a)*1/2,0);
                             q.Color = 'red';
                             q.LineWidth = 4;
                             % q.ShowArrowHead = 'off';
-                            q.MaxHeadSize = 1/norm([(xf-xi)*obj.Pssa(si,sf,a),(yf-yi)*obj.Pssa(si,sf,a)]);
+                            q.MaxHeadSize = 2/norm([(xf-xi)*obj.Pssa(si,sf,a),(yf-yi)*obj.Pssa(si,sf,a)]);
                             
                             q.Marker = 'o';
                             q.MarkerFaceColor = 'green';
@@ -119,8 +119,8 @@ classdef Cliff < Problem
                                 q.Marker = 'd';
                                 q.MarkerFaceColor = 'c';
                                 q.MarkerEdgeColor = 'c';
-                                q.LineStyle = ':';                          
-                            end  
+                                q.LineStyle = ':';
+                            end
                         end
                     end
                 end
@@ -137,11 +137,11 @@ classdef Cliff < Problem
                     if PI(si,a) > 0
                         xf = xi + action_coord(a,1);
                         yf = yi + action_coord(a,2);
-                        q = quiver(xi,yi,(xf-xi)*PI(si,a),(yf-yi)*PI(si,a));
+                        q = quiver(xi,yi,(xf-xi)*PI(si,a)*1/2,(yf-yi)*PI(si,a)*1/2);
                         q.Color = 'red';
                         q.LineWidth = 4;
                         % q.ShowArrowHead = 'off';
-                        q.MaxHeadSize = 1/norm([(xf-xi)*PI(si,a),(yf-yi)*PI(si,a)]);
+                        q.MaxHeadSize = 2/norm([(xf-xi)*PI(si,a),(yf-yi)*PI(si,a)]);
                         
                         q.Marker = 'o';
                         q.MarkerFaceColor = 'green';
@@ -157,11 +157,14 @@ classdef Cliff < Problem
                             q.Marker = 'd';
                             q.MarkerFaceColor = 'c';
                             q.MarkerEdgeColor = 'c';
-                            q.LineStyle = 'none';                          
-                        end                       
+                            q.LineStyle = 'none';
+                        end
                     end
                 end
             end
+            xlabel('South \downarrow')
+            ylabel('West \uparrow')
+            
         end
         
         function plotV(~, v)

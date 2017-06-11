@@ -76,7 +76,7 @@ classdef RandomWalk < Problem
             is = zeros(ns,1);
             if parameters.all_states_initial
                 is(2:ns-1) = 1/(ns-2);
-            else              
+            else
                 is(ceil(ns/2)) = 1;
             end
             obj.initial_states = is;
@@ -98,22 +98,61 @@ classdef RandomWalk < Problem
                 for si = 1:obj.n_states
                     for sf =  1:obj.n_states
                         if obj.Pssa(si,sf,a) > 0
-                            q = quiver(si,0,(sf-si)*obj.Pssa(si,sf,a),0);
+                            q = quiver(si,0,(sf-si)*obj.Pssa(si,sf,a)*1/2,0);
                             q.Color = 'red';
                             q.LineWidth = 2;
                             % q.ShowArrowHead = 'off';
                             % q.MaxHeadSize = 1;
-                            q.MaxHeadSize = 1/(obj.Pssa(si,sf,a));
+                            q.MaxHeadSize = 2/(obj.Pssa(si,sf,a));
                             
                             q.Marker = 'o';
-                            q.MarkerFaceColor = 'blue';
-                            q.MarkerEdgeColor = 'blue';
+                            q.MarkerFaceColor = 'green';
+                            q.MarkerEdgeColor = 'green';
+                            if si == 1 || si == 7
+                                q.Marker = 'd';
+                                q.MarkerFaceColor = 'c';
+                                q.MarkerEdgeColor = 'c';
+                                q.LineStyle = ':';
+                            end
                             
                         end
                     end
                 end
                 axis off
+                xlim([0, 8])
+                ylim([-1, 1])
             end
+        end
+        function plotPolicy(obj, PI)
+            figure
+            hold
+            for si = 1:obj.n_states
+                action_coord = [-1;1];
+                for a = 1:obj.n_actions
+                    if PI(si,a) > 0
+                        xf = si + action_coord(a);
+                        q = quiver(si,0,(xf-si)*PI(si,a)*1/2,0);
+                        q.Color = 'red';
+                        q.LineWidth = 4;
+                        % q.ShowArrowHead = 'off';
+                        q.MaxHeadSize = 2/abs((xf-si)*PI(si,a));
+                        
+                        q.Marker = 'o';
+                        q.MarkerFaceColor = 'green';
+                        q.MarkerEdgeColor = 'green';
+                        q.MarkerSize = 5;
+                        if si == 1 || si == 7
+                            q.Marker = 'd';
+                            q.MarkerFaceColor = 'c';
+                            q.MarkerEdgeColor = 'c';
+                            q.LineStyle = 'none';
+                        end
+                    end
+                end
+            end
+            axis off
+            xlim([0, 8])
+            ylim([-1, 1])
         end
     end
     

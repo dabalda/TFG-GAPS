@@ -6,7 +6,7 @@ function [ PI, Q, v, n_it ] = PIq( problem, epsilon, PI_ini )
 %   PI_ini. Greedy policies select all actions whose value is not worse 
 %   than the best minus epsilon.
 %
-%   [ PI, Q, v, n_it ] = PIq( problem, epsilon ) same as above except than
+%   [ PI, Q, v, n_it ] = PIq( problem, epsilon ) same as above except that
 %   the initial policy is the random policy.
 
 narginchk(2,3);
